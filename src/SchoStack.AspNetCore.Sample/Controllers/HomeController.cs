@@ -11,6 +11,8 @@ using SchoStack.AspNetCore.Invoker;
 using SchoStack.AspNetCore.ModelUrls;
 using SchoStack.AspNetCore.Sample.Models;
 using SchoStack.AspNetCore.MediatR;
+using SchoStack.AspNetCore.HtmlConventions;
+using SchoStack.AspNetCore.Sample.Components;
 
 namespace SchoStack.AspNetCore.Sample.Controllers
 {
@@ -53,6 +55,9 @@ namespace SchoStack.AspNetCore.Sample.Controllers
             .Success(_ => Redirect(Url.For(new AboutQueryModel())))
             .Send();
 
+        [Route("home/component")]
+        public IActionResult Component(ComponentQueryModel query) => this.ViewComponent(query);
+
         public IActionResult Contact()
         {
             ViewData["Message"] = "Your contact page.";
@@ -63,6 +68,19 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+
+    public class ComponentQueryModel : IRequest<Unit>, IComponentModel<TestComponent>
+    {
+        public string Name { get; set; }
+    }
+
+    public class ComponentHandler : IRequestHandler<ComponentQueryModel, Unit>
+    {
+        public Unit Handle(ComponentQueryModel message)
+        {
+            return Unit.Value;
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿@using SchoStack.AspNetCore.HtmlConventions
 @using SchoStack.AspNetCore.ModelUrls
+@using SchoStack.AspNetCore.Sample.Components
 @using SchoStack.AspNetCore.Sample.Controllers
 @model AboutViewModel
 @{
@@ -22,3 +23,5 @@
         @Url.For(new AboutQueryModel())
     </div>
 }
+
+@await Component.InvokeAsync(new ComponentQueryModel() { Name = "The Name From Component" })

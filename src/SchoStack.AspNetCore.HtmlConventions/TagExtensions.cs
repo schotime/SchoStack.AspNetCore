@@ -38,21 +38,21 @@ namespace SchoStack.AspNetCore.HtmlConventions
         public static HtmlTag Input<TModel>(this IHtmlHelper<TModel> helper, Expression<Func<TModel, object>> expression)
         {
             var options = helper.ViewContext.HttpContext.RequestServices.GetService<HtmlConventionOptions>();
-            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention)helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
+            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention) helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
             return tag.GenerateInputFor(helper.ViewContext, expression);
         }
 
         public static HtmlTag Display<TModel>(this IHtmlHelper<TModel> helper, Expression<Func<TModel, object>> expression)
         {
             var options = helper.ViewContext.HttpContext.RequestServices.GetService<HtmlConventionOptions>();
-            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention)helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
+            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention) helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
             return tag.GenerateDisplayFor(helper.ViewContext, expression);
         }
 
         public static HtmlTag Label<TModel>(this IHtmlHelper<TModel> helper, Expression<Func<TModel, object>> expression)
         {
             var options = helper.ViewContext.HttpContext.RequestServices.GetService<HtmlConventionOptions>();
-            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention)helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
+            var tag = new TagGenerator(options.Conventions.Select(x => (HtmlConvention) helper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
             return tag.GenerateLabelFor(helper.ViewContext, expression);
         }
 
@@ -89,7 +89,7 @@ namespace SchoStack.AspNetCore.HtmlConventions
         {
             var reqName = RequestData.GetName(ReflectionHelper.GetAccessor(expression));
             var errors = htmlHelper.ViewData.ModelState.ContainsKey(reqName) && htmlHelper.ViewData.ModelState[reqName].Errors.Any();
-            var val = HtmlHelperValidationExtensions.ValidationMessage(htmlHelper, reqName, message, errors ? new { role = "alert" } : null);
+            var val = HtmlHelperValidationExtensions.ValidationMessage(htmlHelper, reqName, message, errors ? new {role = "alert"} : null);
             if (val != null)
             {
                 var sb = new StringBuilder();
@@ -111,8 +111,7 @@ namespace SchoStack.AspNetCore.HtmlConventions
             var tag = TagGen(htmlHelper).GenerateTagFor(htmlHelper.ViewContext, () => new HtmlTag(tagName));
             return tag;
         }
-
-
+        
         public static Task<IHtmlContent> PartialAsync(this IHtmlHelper htmlHelper, string partial)
         {
             return HtmlHelperPartialExtensions.PartialAsync(htmlHelper, partial);
@@ -131,7 +130,7 @@ namespace SchoStack.AspNetCore.HtmlConventions
         public static TagGenerator TagGen(IHtmlHelper htmlHelper)
         {
             var options = htmlHelper.ViewContext.HttpContext.RequestServices.GetService<HtmlConventionOptions>();
-            return new TagGenerator(options.Conventions.Select(x => (HtmlConvention)htmlHelper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
+            return new TagGenerator(options.Conventions.Select(x => (HtmlConvention) htmlHelper.ViewContext.HttpContext.RequestServices.GetService(x)).ToList());
         }
 
         public static LinkTag Link<T>(this IHtmlHelper htmlHelper, T model, string text) where T : class, new()
@@ -173,8 +172,8 @@ namespace SchoStack.AspNetCore.HtmlConventions
         {
             var options = viewContext.HttpContext.RequestServices.GetService<HtmlConventionOptions>();
             viewContext.HttpContext.Items[TagGenerator.FORMINPUTTYPE] = inputType;
-            var tagGenerator = new TagGenerator(options.Conventions.Select(x => (HtmlConvention)viewContext.HttpContext.RequestServices.GetService(x)).ToList());
-            var tag = tagGenerator.GenerateTagFor(viewContext, () => (FormTag)new FormTag(url).NoClosingTag());
+            var tagGenerator = new TagGenerator(options.Conventions.Select(x => (HtmlConvention) viewContext.HttpContext.RequestServices.GetService(x)).ToList());
+            var tag = tagGenerator.GenerateTagFor(viewContext, () => (FormTag) new FormTag(url).NoClosingTag());
             modifier(tag);
             viewContext.Writer.WriteLine(tag);
             return new InputTypeMvcForm(viewContext);
