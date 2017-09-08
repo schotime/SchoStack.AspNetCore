@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoStack.AspNetCore.ModelUrls", "SchoStack.AspNetCore.ModelUrls\SchoStack.AspNetCore.ModelUrls.csproj", "{41825DC8-50BA-49BB-B6FD-3630F24579A7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.HtmlConventions", "SchoStack.AspNetCore.HtmlConventions\SchoStack.AspNetCore.HtmlConventions.csproj", "{EEC054C0-3B1A-47C0-BF9E-63111432E051}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.Sample", "SchoStack.AspNetCore.Sample\SchoStack.AspNetCore.Sample.csproj", "{B48AED2F-B8A3-4AE8-8A0B-A160900B17E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.FluentValidation", "SchoStack.AspNetCore.FluentValidation\SchoStack.AspNetCore.FluentValidation.csproj", "{236B6C1A-9BD9-4087-B8DB-DD822B7AF31B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.Invoker", "SchoStack.AspNetCore.Invoker\SchoStack.AspNetCore.Invoker.csproj", "{7EC91209-7C39-4FE1-A780-0103B74E7E60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.MediatR", "SchoStack.AspNetCore.MediatR\SchoStack.AspNetCore.MediatR.csproj", "{08BA5637-9BBD-48CF-B89C-3F5905C5F491}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{41825DC8-50BA-49BB-B6FD-3630F24579A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41825DC8-50BA-49BB-B6FD-3630F24579A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41825DC8-50BA-49BB-B6FD-3630F24579A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41825DC8-50BA-49BB-B6FD-3630F24579A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEC054C0-3B1A-47C0-BF9E-63111432E051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEC054C0-3B1A-47C0-BF9E-63111432E051}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEC054C0-3B1A-47C0-BF9E-63111432E051}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEC054C0-3B1A-47C0-BF9E-63111432E051}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B48AED2F-B8A3-4AE8-8A0B-A160900B17E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B48AED2F-B8A3-4AE8-8A0B-A160900B17E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B48AED2F-B8A3-4AE8-8A0B-A160900B17E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B48AED2F-B8A3-4AE8-8A0B-A160900B17E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{236B6C1A-9BD9-4087-B8DB-DD822B7AF31B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{236B6C1A-9BD9-4087-B8DB-DD822B7AF31B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{236B6C1A-9BD9-4087-B8DB-DD822B7AF31B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{236B6C1A-9BD9-4087-B8DB-DD822B7AF31B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EC91209-7C39-4FE1-A780-0103B74E7E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EC91209-7C39-4FE1-A780-0103B74E7E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EC91209-7C39-4FE1-A780-0103B74E7E60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EC91209-7C39-4FE1-A780-0103B74E7E60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B5C204FC-DC37-4642-A475-E74A94D3A98B}
+	EndGlobalSection
+EndGlobal

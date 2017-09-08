@@ -1,0 +1,24 @@
+﻿@using SchoStack.AspNetCore.HtmlConventions
+@using SchoStack.AspNetCore.ModelUrls
+@using SchoStack.AspNetCore.Sample.Controllers
+@model AboutViewModel
+@{
+    ViewData["Title"] = "About";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>Use this area to provide additional information.</p>
+
+@using (Html.Form<AboutInputModel>())
+{
+    @Html.Input(x => x.Name)
+    @Html.ValidationMessage(x => x.Name)
+    @Html.Submit("Submiz")
+
+    @Html.Link(new AboutQueryModel(), "Some Link")
+
+    <div>
+        @Url.For(new AboutQueryModel())
+    </div>
+}
