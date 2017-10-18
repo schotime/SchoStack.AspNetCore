@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -108,10 +109,10 @@ namespace SchoStack.AspNetCore.Invoker
                 _builder = builder;
             }
 
-            public override void ExecuteResult(ActionContext context)
+            public override Task ExecuteResultAsync(ActionContext context)
             {
                 var result = ExecuteResult(new SchoStackActionContext(context));
-                result?.ExecuteResult(context);
+                return result?.ExecuteResultAsync(context);
             }
 
             public ActionResult ExecuteResult(IActionContext context)
@@ -207,10 +208,10 @@ namespace SchoStack.AspNetCore.Invoker
                 _builder = builder;
             }
 
-            public override void ExecuteResult(ActionContext context)
+            public override Task ExecuteResultAsync(ActionContext context)
             {
                 var result = ExecuteResult(new SchoStackActionContext(context));
-                result?.ExecuteResult(context);
+                return result?.ExecuteResultAsync(context);
             }
 
             public ActionResult ExecuteResult(IActionContext context)

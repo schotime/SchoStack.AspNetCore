@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using SchoStack.AspNetCore.Invoker;
@@ -16,15 +17,34 @@ using SchoStack.AspNetCore.Sample.Components;
 
 namespace SchoStack.AspNetCore.Sample.Controllers
 {
+    public class TestController
+    {
+        private readonly IActionContextAccessor _actionContextAccessor;
+
+        public TestController(IActionContextAccessor actionContextAccessor)
+        {
+            _actionContextAccessor = actionContextAccessor;
+        }
+
+        [Route("test/it")]
+        [HttpGet]
+        public Task<dynamic> It()
+        {
+            return Task.FromResult((dynamic)new{ what = "the"});
+        }
+    }
+
     public class HomeController : Controller
     {
         private readonly IActionResultBuilder _actionResultBuilder;
         private readonly IAsyncActionResultBuilder _actionBuilder;
+        private readonly IInvoker _invoker;
 
-        public HomeController(IActionResultBuilder actionResultBuilder, IAsyncActionResultBuilder actionBuilder)
+        public HomeController(IActionResultBuilder actionResultBuilder, IAsyncActionResultBuilder actionBuilder, IInvoker invoker)
         {
             _actionResultBuilder = actionResultBuilder;
             _actionBuilder = actionBuilder;
+            _invoker = invoker;
         }
 
         public IActionResult Index()
@@ -34,16 +54,24 @@ namespace SchoStack.AspNetCore.Sample.Controllers
 
         [HttpGet]
         [Route("home/about")]
-        public IActionResult About(AboutQueryModel query)
+        public ActionResult About(AboutQueryModel query)
         {
             ViewData["Message"] = "Your application description page.";
 
-            return _actionResultBuilder.Build(query, z => z
+            return new HandleActionBuilder<AboutQueryModel>(query, _invoker)
                 .Returning<AboutViewModel>()
-                .OnSuccess(View));
+                .OnSuccess(View);
+        }
 
-            //var vm = new AboutViewModel();
-            //return View(vm);
+        [HttpGet]
+        [Route("home/about2")]
+        public ActionResult About2(AboutQueryModel2 query)
+        {
+            ViewData["Message"] = "Your application description page.";
+
+            return _actionResultBuilder.Build(new AboutQueryModel(), z => z
+                .Returning<AboutViewModel>()
+                .OnSuccess(x => View("About", x)));
         }
 
         [HttpPost]
@@ -82,6 +110,10 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         {
             return Unit.Value;
         }
+    }
+
+    public class AboutQueryModel2 : AboutQueryModel
+    {
     }
 
     public class AboutQueryModel
