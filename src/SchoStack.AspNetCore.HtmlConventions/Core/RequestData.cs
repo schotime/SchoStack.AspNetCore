@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using HtmlTags.Reflection;
@@ -105,11 +106,19 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
 
         public virtual T GetValue<T>()
         {
-            if (ViewContext.ViewData.Model == null)
+            var model = GetModel();
+            if (model == null)
                 return default(T);
 
-            var val = Accessor.GetValue(ViewContext.ViewData.Model);
+            var val = Accessor.GetValue(model);
             return ConvertValue<T>(this, val);
+        }
+
+        private object GetModel()
+        {
+            return ViewContext.ViewData.ContainsKey("SchoStack.Model")
+                ? ViewContext.ViewData["SchoStack.Model"]
+                : ViewContext.ViewData.Model;
         }
 
         public static T ConvertValue<T>(RequestData rd, object val)
@@ -154,6 +163,21 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
                 InputType = inputType ?? (viewContext != null ? viewContext.HttpContext.Items[TagGenerator.FORMINPUTTYPE] : null) as Type
             };
             return req;
+        }
+
+        public static RequestData BuildRequestData(Accessor accessor, Type inputType = null)
+        {
+            var req = new RequestData()
+            {
+                Accessor = accessor
+            };
+            return req;
+        }
+
+        public static RequestData BuildRequestData<TModel, TProperty>(ViewContext viewContext, Expression<Func<TModel, TProperty>> expression)
+        {
+            var accessor = ReflectionHelper.GetAccessor(expression);
+            return BuildRequestData(viewContext, accessor);
         }
     }
 
