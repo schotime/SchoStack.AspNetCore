@@ -7,7 +7,7 @@ using HtmlTags.Reflection;
 
 namespace SchoStack.AspNetCore.HtmlConventions.Core
 {
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
         public static bool MeetsSpecialGenericConstraints(Type genericArgType, Type proposedSpecificType)
         {
@@ -109,6 +109,11 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
 
         public static Accessor GetAccessor<TModel>(Expression<Func<TModel, object>> expression)
         {
+            if (expression.Body.NodeType == ExpressionType.Convert)
+            {
+                return GetAccessor(((UnaryExpression)expression.Body).Operand);
+            }
+
             if (expression.Body is MethodCallExpression || expression.Body.NodeType == ExpressionType.ArrayIndex)
             {
                 return GetAccessor(expression.Body);
