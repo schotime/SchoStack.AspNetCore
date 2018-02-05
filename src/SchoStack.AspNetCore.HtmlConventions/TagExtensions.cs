@@ -56,30 +56,6 @@ namespace SchoStack.AspNetCore.HtmlConventions
             return tag.GenerateLabelFor(helper.ViewContext, expression);
         }
 
-        public static HtmlTag ValidationSummary(this IHtmlHelper htmlHelper)
-        {
-            return ValidationSummary(htmlHelper, false);
-        }
-
-        public static HtmlTag ValidationSummary(this IHtmlHelper htmlHelper, bool excludePropertyErrors)
-        {
-            var val = HtmlHelperValidationExtensions.ValidationSummary(htmlHelper, excludePropertyErrors, null, new {role = "alert"});
-            if (val != null)
-            {
-                var sb = new StringBuilder();
-                using (var stringWriter = new StringWriter(sb))
-                    val.WriteTo(stringWriter, HtmlEncoder.Default);
-                return new LiteralTag(sb.ToString());
-            }
-
-            var valtag = new DivTag().AddClass(HtmlHelper.ValidationSummaryCssClassName);
-            valtag.Append(new HtmlTag("ul").Append(new HtmlTag("li").Style("display", "none")));
-            if (!excludePropertyErrors)
-                valtag.Data("valmsg-summary", "true");
-
-            return new LiteralTag(valtag.ToHtmlString());
-        }
-
         public static LiteralTag ValidationMessage<TModel, TProperty>(this IHtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression)
         {
             return ValidationMessage(htmlHelper, expression, null);
@@ -140,6 +116,13 @@ namespace SchoStack.AspNetCore.HtmlConventions
             return tag;
         }
 
+        public static LinkTag Link(this IHtmlHelper htmlHelper, string text, string action)
+        {
+            var urlHelper = new UrlHelper(htmlHelper.ViewContext);
+            var tag = TagGen(htmlHelper).GenerateTagFor(htmlHelper.ViewContext, () => new LinkTag(text, urlHelper.Action(action)));
+            return tag;
+        }
+
         public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper) where TInput : class, new()
         {
             return Form(htmlHelper, new TInput());
@@ -150,12 +133,12 @@ namespace SchoStack.AspNetCore.HtmlConventions
             return Form(htmlHelper, new TInput(), modifier);
         }
 
-        public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper, TInput model) where TInput : class, new()
+        public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper, TInput model) where TInput : class
         {
             return Form(htmlHelper, model, begin => { });
         }
 
-        public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper, TInput model, Action<FormTag> modifier) where TInput : class, new()
+        public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper, TInput model, Action<FormTag> modifier) where TInput : class
         {
             var urlHelper = new UrlHelper(htmlHelper.ViewContext);
             var url = urlHelper.For(model);
