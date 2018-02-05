@@ -10,21 +10,23 @@ namespace SchoStack.AspNetCore.FluentValidation
 {
     public class FluentValidationHtmlConventions : HtmlConvention
     {
-        public List<Action<IEnumerable<PropertyValidatorResult>, HtmlTag, RequestData>> RuleProviders = new List<Action<IEnumerable<PropertyValidatorResult>, HtmlTag, RequestData>>();
+        private readonly List<Action<IEnumerable<PropertyValidatorResult>, HtmlTag, RequestData>> _ruleProviders = new List<Action<IEnumerable<PropertyValidatorResult>, HtmlTag, RequestData>>();
 
-        public FluentValidationHtmlConventions(FluentValidatorFinder validatorFinder)
+        public FluentValidationHtmlConventions(IValidatorFinder validatorFinder, FluentValidationOptions fluentValidationOptions)
         {
-            RuleProviders.Add(AddLengthClasses);
-            RuleProviders.Add(AddRequiredClass);
-            RuleProviders.Add(AddCreditCardClass);
-            RuleProviders.Add(AddEqualToDataAttr);
-            RuleProviders.Add(AddRegexData);
-            RuleProviders.Add(AddEmailData);
+            _ruleProviders.Add(AddLengthClasses);
+            _ruleProviders.Add(AddRequiredClass);
+            _ruleProviders.Add(AddCreditCardClass);
+            _ruleProviders.Add(AddEqualToDataAttr);
+            _ruleProviders.Add(AddRegexData);
+            _ruleProviders.Add(AddEmailData);
+
+            _ruleProviders.AddRange(fluentValidationOptions.RuleProviders);
 
             Inputs.Always.Modify((h, r) =>
             {
                 var propertyValidators = validatorFinder.FindValidators(r);
-                foreach (var ruleProvider in RuleProviders)
+                foreach (var ruleProvider in _ruleProviders)
                 {
                     ruleProvider.Invoke(propertyValidators, h, r);
                 }
