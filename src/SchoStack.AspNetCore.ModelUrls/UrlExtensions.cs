@@ -16,7 +16,7 @@ namespace SchoStack.AspNetCore.ModelUrls
             return For(urlHelper, new T());
         }
 
-        public static string For<T>(this IUrlHelper urlHelper, T obj) where T : class, new()
+        public static string For<T>(this IUrlHelper urlHelper, T obj) where T : class
         {
             return ForAsync(urlHelper, obj).Result;
         }
@@ -31,7 +31,7 @@ namespace SchoStack.AspNetCore.ModelUrls
             return await ForAsync(urlHelper, new T(), true, modifiers);
         }
 
-        public static async Task<string> ForAsync<T>(this IUrlHelper urlHelper, T model, bool bindExistingQueryString = false, params Action<T>[] modifiers) where T : class, new()
+        public static async Task<string> ForAsync<T>(this IUrlHelper urlHelper, T model, bool bindExistingQueryString = false, params Action<T>[] modifiers) where T : class
         {
             if (bindExistingQueryString)
             {
@@ -41,7 +41,7 @@ namespace SchoStack.AspNetCore.ModelUrls
 
                 var modelBound = await ModelBindingHelper.TryUpdateModelAsync(model,
                     string.Empty,
-                    urlHelper.ActionContext,
+	                new ControllerContext(urlHelper.ActionContext),
                     meta,
                     modelfactory,
                     new QueryStringValueProvider(BindingSource.Query, urlHelper.ActionContext.HttpContext.Request.Query, CultureInfo.CurrentCulture),
@@ -57,11 +57,6 @@ namespace SchoStack.AspNetCore.ModelUrls
             var actionConventions = urlHelper.ActionContext.HttpContext.RequestServices.GetRequiredService<ActionConventionOptions>();
             var dict = dictGenerator.Generate(model, (t, o) => actionConventions.TypeFormatters.ContainsKey(t) ? actionConventions.TypeFormatters[t](o, urlHelper.ActionContext) : o, (propertyInfo, atts) => actionConventions.PropertyNameModifier.GetModifiedPropertyName(propertyInfo, atts));
             var url = urlHelper.RouteUrl(model.GetType().ToString(), dict);
-
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                throw new Exception($"No URL found for type: {model.GetType().FullName}");
-            }
 
             return url;
         }
