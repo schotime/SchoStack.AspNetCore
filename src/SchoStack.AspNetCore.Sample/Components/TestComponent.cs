@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SchoStack.AspNetCore.HtmlConventions;
 using SchoStack.AspNetCore.MediatR;
@@ -22,7 +24,11 @@ namespace SchoStack.AspNetCore.Sample.Components
         public async Task<IViewComponentResult> InvokeAsync(ComponentQueryModel input) => await _builder
             .For(input)
             .Error(() => Content("errored"))
-            .Success(x => Content(input.Name))
+            .Success(async x =>
+            {
+                await Task.FromResult(0);
+                return Content(input.Name);
+            })
             .Send();
     }
 }

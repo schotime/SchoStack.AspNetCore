@@ -23,7 +23,9 @@ namespace SchoStack.AspNetCore.MediatR
     public interface IBuilderActions<TResponse, TResult>
     {
         IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result);
+        IBuilderActions<TResponse, TResult> Error(Func<Task<TResult>> result);
         IBuilderActions<TResponse, TResult> Error(Func<TResult> result);
+        ISendableActions<TResult> Success(Func<TResponse, Task<TResult>> result);
         ISendableActions<TResult> Success(Func<TResponse, TResult> result);
     }
 
@@ -60,8 +62,8 @@ namespace SchoStack.AspNetCore.MediatR
             private readonly IRequest<TResponse> _request;
 
             private readonly List<ConditionResult<TResponse, TResult>> _conditionResults  = new List<ConditionResult<TResponse, TResult>>();
-            private Func<TResult> _errorResult;
-            private Func<TResponse, TResult> _successResult;
+            private Func<Task<TResult>> _errorResult;
+            private Func<TResponse, Task<TResult>> _successResult;
 
             public BuilderActions(IRequest<TResponse> request, IMediator mediator, IActionContextAccessor actionContextAccessor)
             {
@@ -70,21 +72,39 @@ namespace SchoStack.AspNetCore.MediatR
                 _request = request;
             }
 
-            public IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result)
+            public IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, Task<TResult>> result)
             {
                 _conditionResults.Add(new ConditionResult<TResponse, TResult>(condition, result));
                 return this;
             }
 
-            public IBuilderActions<TResponse, TResult> Error(Func<TResult> result)
+            public IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result)
+            {
+                _conditionResults.Add(new ConditionResult<TResponse, TResult>(condition, resp => Task.FromResult(result.Invoke(resp))));
+                return this;
+            }
+
+            public IBuilderActions<TResponse, TResult> Error(Func<Task<TResult>> result)
             {
                 _errorResult = result;
                 return this;
             }
 
-            public ISendableActions<TResult> Success(Func<TResponse, TResult> result)
+            public IBuilderActions<TResponse, TResult> Error(Func<TResult> result)
+            {
+                _errorResult = () => Task.FromResult(result.Invoke());
+                return this;
+            }
+
+            public ISendableActions<TResult> Success(Func<TResponse, Task<TResult>> result)
             {
                 _successResult = result;
+                return this;
+            }
+
+            public ISendableActions<TResult> Success(Func<TResponse, TResult> result)
+            {
+                _successResult = resp => Task.FromResult(result.Invoke(resp));
                 return this;
             }
 
@@ -93,26 +113,26 @@ namespace SchoStack.AspNetCore.MediatR
                 var result = await _mediator.Send(_request, cancellationToken);
 
                 if (_errorResult != null && !_actionContextAccessor.ActionContext.ModelState.IsValid)
-                    return _errorResult();
+                    return await _errorResult();
 
                 var conditionResult = _conditionResults.FirstOrDefault(x => x.Condition(result))?.Result;
                 if (conditionResult != null)
-                    return conditionResult?.Invoke(result);
-
-                return _successResult?.Invoke(result);
+                    return await conditionResult.Invoke(result);
+                
+                return await (_successResult?.Invoke(result) ?? Task.FromResult((TResult) null));
             }
         }
 
         public class ConditionResult<TResponse, TResult>
         {
-            public ConditionResult(Func<TResponse, bool> condition, Func<TResponse, TResult> result)
+            public ConditionResult(Func<TResponse, bool> condition, Func<TResponse, Task<TResult>> result)
             {
                 Condition = condition;
                 Result = result;
             }
 
             public Func<TResponse, bool> Condition { get; }
-            public Func<TResponse, TResult> Result { get; }
+            public Func<TResponse, Task<TResult>> Result { get; }
         }
     }
 }
