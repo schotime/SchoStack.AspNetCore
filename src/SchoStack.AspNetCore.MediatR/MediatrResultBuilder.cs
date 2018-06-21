@@ -22,6 +22,7 @@ namespace SchoStack.AspNetCore.MediatR
 
     public interface IBuilderActions<TResponse, TResult>
     {
+        IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, Task<TResult>> result);
         IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result);
         IBuilderActions<TResponse, TResult> Error(Func<Task<TResult>> result);
         IBuilderActions<TResponse, TResult> Error(Func<TResult> result);
@@ -110,10 +111,10 @@ namespace SchoStack.AspNetCore.MediatR
 
             public async Task<TResult> Send(CancellationToken cancellationToken = default(CancellationToken))
             {
-                var result = await _mediator.Send(_request, cancellationToken);
-
                 if (_errorResult != null && !_actionContextAccessor.ActionContext.ModelState.IsValid)
                     return await _errorResult();
+
+                var result = await _mediator.Send(_request, cancellationToken);
 
                 var conditionResult = _conditionResults.FirstOrDefault(x => x.Condition(result))?.Result;
                 if (conditionResult != null)
