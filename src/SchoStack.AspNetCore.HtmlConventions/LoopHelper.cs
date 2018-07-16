@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SchoStack.AspNetCore.HtmlConventions
 {
@@ -11,7 +12,7 @@ namespace SchoStack.AspNetCore.HtmlConventions
 
         public static IEnumerable<T> Track<T>(this IEnumerator<T> enumerator, IHtmlHelper htmlHelper)
         {
-            Context = htmlHelper.ViewContext.HttpContext;
+            ContextAccessor = ContextAccessor ?? htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IHttpContextAccessor>();
             var tracker = new LoopState<T>(CurrentLoop, enumerator);
             CurrentLoop = tracker;
             return tracker;
@@ -78,11 +79,11 @@ namespace SchoStack.AspNetCore.HtmlConventions
 
         private static ILoopState CurrentLoop
         {
-            get => Context.Items[_itemsKey] as ILoopState;
-            set => Context.Items[_itemsKey] = value;
+            get => ContextAccessor.HttpContext.Items[_itemsKey] as ILoopState;
+            set => ContextAccessor.HttpContext.Items[_itemsKey] = value;
         }
 
-        public static HttpContext Context { get; set; }
+        public static IHttpContextAccessor ContextAccessor { get; set; }
 
         private static void End()
         {

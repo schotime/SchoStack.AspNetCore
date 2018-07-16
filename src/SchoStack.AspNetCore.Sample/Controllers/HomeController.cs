@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using SchoStack.AspNetCore.Invoker;
 using SchoStack.AspNetCore.ModelUrls;
 using SchoStack.AspNetCore.Sample.Models;
@@ -54,9 +55,12 @@ namespace SchoStack.AspNetCore.Sample.Controllers
 
         [HttpGet]
         [Route("home/about")]
-        public ActionResult About(AboutQueryModel query)
+        public async Task<ActionResult> About(AboutQueryModel query)
         {
-            ViewData["Message"] = "Your application description page.";
+            var requiredService = HttpContext.RequestServices.GetRequiredService<IUrlHelper>();
+            ViewData["Message"] = await requiredService.ForAsync(new AboutQueryModel(), true);
+
+
 
             return new HandleActionBuilder<AboutQueryModel>(query, _invoker)
                 .Returning<AboutViewModel>()
@@ -78,7 +82,7 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         [Route("home/about")]
         public async Task<IActionResult> About(AboutInputModel input) => await _actionBuilder
             .For(input)
-            .Error(() => About(new AboutQueryModel()))
+            .Error(async () => await About(new AboutQueryModel()))
             .On(y => !string.IsNullOrEmpty(y.RedirectUrl), y => Redirect(y.RedirectUrl))
             .Success(_ => Redirect(Url.For(new AboutQueryModel())))
             .Send();
@@ -118,11 +122,14 @@ namespace SchoStack.AspNetCore.Sample.Controllers
 
     public class AboutQueryModel
     {
+        public string Name { get; set; }
+        public string Name2 { get; set; }
     }
 
     public class AboutInputModel : IRequest<AboutResponseModel>
     {
         [MinLength(4)]
+        [StringLength(100)]
         [Required]
         public string Name { get; set; }
     }

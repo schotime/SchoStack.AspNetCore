@@ -10,7 +10,7 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
 {
     public class TagGenerator
     {
-        public const string FORMINPUTTYPE = "__formType";
+        public const string FORMINPUTTYPE = "SchoStack.Model";
         private readonly IHtmlProfile _globalHtmlProfile;
 
         public TagGenerator(List<HtmlConvention> htmlConventions)

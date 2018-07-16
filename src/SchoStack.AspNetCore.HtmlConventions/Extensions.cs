@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using SchoStack.AspNetCore.HtmlConventions.Core;
+using SchoStack.AspNetCore.ModelUrls;
 
 namespace SchoStack.AspNetCore.HtmlConventions
 {

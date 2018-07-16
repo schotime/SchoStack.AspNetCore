@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HtmlTags;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -40,6 +41,7 @@ namespace SchoStack.AspNetCore.Sample
             services.AddHtmlConventions(opt =>
             {
                 opt.AddConventions<DefaultHtmlConventions>();
+                opt.AddConventions<DataAnnotationValidationHtmlConventions>();
                 opt.AddConventions<FluentValidationHtmlConventions>();
             });
         }

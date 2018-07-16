@@ -1,4 +1,6 @@
-﻿@using SchoStack.AspNetCore.HtmlConventions
+﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.DependencyInjection
+@using SchoStack.AspNetCore.HtmlConventions
 @using SchoStack.AspNetCore.ModelUrls
 @using SchoStack.AspNetCore.Sample.Components
 @using SchoStack.AspNetCore.Sample.Controllers
@@ -20,8 +22,20 @@
     @Html.Link(new AboutQueryModel(), "Some Link")
 
     <div>
-        @Url.For(new AboutQueryModel())
+        @await Url.ForAsync(new AboutQueryModel(), true)
     </div>
 }
+<form model-url-action="@(await Url.BindModelFor(new AboutInputModel(), true))">
+    <button>Something</button>
+</form>
+
+<form model-url-action="@(new AboutInputModel())">
+    @Html.Input(x => x.Name)
+    @Html.ValidationMessage(x => x.Name)
+</form>
+
+<a model-url-href="@(new AboutQueryModel())">Test link</a>
+
+<div model-url-data-url="new AboutInputModel()"></div>
 
 @await Component.InvokeAsync(new ComponentQueryModel() { Name = "The Name From Component" })
