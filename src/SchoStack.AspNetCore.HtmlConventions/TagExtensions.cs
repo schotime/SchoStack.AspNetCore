@@ -87,16 +87,6 @@ namespace SchoStack.AspNetCore.HtmlConventions
             var tag = TagGen(htmlHelper).GenerateTagFor(htmlHelper.ViewContext, () => new HtmlTag(tagName));
             return tag;
         }
-        
-        public static Task<IHtmlContent> PartialAsync(this IHtmlHelper htmlHelper, string partial)
-        {
-            return HtmlHelperPartialExtensions.PartialAsync(htmlHelper, partial);
-        }
-
-        public static Task<IHtmlContent> PartialAsync(this IHtmlHelper htmlHelper, string partial, object model)
-        {
-            return HtmlHelperPartialExtensions.PartialAsync(htmlHelper, partial, model);
-        }
 
         public static string Class(this IHtmlHelper htmlHelper, bool condition, string className)
         {
