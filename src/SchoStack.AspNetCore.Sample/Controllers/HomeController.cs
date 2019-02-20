@@ -124,6 +124,8 @@ namespace SchoStack.AspNetCore.Sample.Controllers
     {
         public string Name { get; set; }
         public string Name2 { get; set; }
+
+        public List<string> WorkflowStates { get; set; } = new List<string>();
     }
 
     public class AboutInputModel : IRequest<AboutResponseModel>

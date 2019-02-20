@@ -73,14 +73,11 @@ namespace SchoStack.AspNetCore.ModelUrls
                         if (sub == null)
                             continue;
 
-                        var listCache = cache.GetOrAdd(t.FullName + prefix + p.Name + "_list", _ => new Cache
+                        var subType = sub.GetType();
+                        var subPropType = IsEnum(subType) || IsConvertible(subType) ? PropType.Simple : PropType.Unknown;
+
+                        if (subPropType == PropType.Simple)
                         {
-                            PropType = IsEnum(p.PropertyType) || IsConvertible(p.PropertyType) ? PropType.Simple : PropType.Unknown,
-                        });
-                        
-                        if (listCache.PropType == PropType.Simple)
-                        {
-                            var subType = sub.GetType();
                             dict.Add(prefix + propertyNameFormatter(p, attributes) + "[" + (i++) + "]", typeFormatter(subType, sub));
                         }
                         else
