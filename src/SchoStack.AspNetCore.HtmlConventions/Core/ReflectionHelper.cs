@@ -152,6 +152,10 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
         private static void BuildValueGetters(Expression expression, IList<IValueGetter> list)
         {
             var memberExpression = expression as MemberExpression;
+
+            if (memberExpression == null && expression is UnaryExpression)
+                memberExpression = ((UnaryExpression)expression).Operand as MemberExpression;
+
             if (memberExpression != null)
             {
                 var propertyInfo = (PropertyInfo)memberExpression.Member;
