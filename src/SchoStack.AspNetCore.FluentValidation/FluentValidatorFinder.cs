@@ -9,6 +9,7 @@ using SchoStack.AspNetCore.HtmlConventions.Core;
 
 namespace SchoStack.AspNetCore.FluentValidation
 {
+#pragma warning disable CS0612 // Type or member is obsolete
     public interface IValidatorFinder
     {
         IEnumerable<PropertyValidatorResult> FindValidators(RequestData r);
@@ -57,9 +58,15 @@ namespace SchoStack.AspNetCore.FluentValidation
             foreach (var inlineval in vals)
             {
                 if (i == propertyInfo.Count - 1)
-                    propertyValidators.Add(new PropertyValidatorResult(inlineval, name));
+                {
+                    var propertyVal = inlineval is DelegatingValidator delegatingValidator
+                        ? delegatingValidator.InnerValidator
+                        : inlineval;
 
-                IValidator val = GetValidator(inlineval, null);
+                    propertyValidators.Add(new PropertyValidatorResult(propertyVal, name));
+                }
+
+                var val = GetValidator(inlineval, null);
 
                 if (val == null)
                     continue;
@@ -74,13 +81,19 @@ namespace SchoStack.AspNetCore.FluentValidation
         private IValidator GetValidator(IPropertyValidator inlineval, IValidator val)
         {
             var valtype = inlineval.GetType();
-            if (valtype == typeof (ChildCollectionValidatorAdaptor))
-                val = ResolveValidator(((ChildCollectionValidatorAdaptor) inlineval).ChildValidatorType);
-            else if (valtype == typeof (ChildValidatorAdaptor))
-                val = ResolveValidator(((ChildValidatorAdaptor) inlineval).ValidatorType);
-            else if (valtype == typeof (DelegatingValidator))
-                val = GetValidator(((DelegatingValidator) inlineval).InnerValidator, val);
+            if (valtype == typeof(ChildValidatorAdaptor))
+                val = GetChildValidator((ChildValidatorAdaptor)inlineval);
+            else if (valtype == typeof(DelegatingValidator))
+                val = GetValidator(((DelegatingValidator)inlineval).InnerValidator, val);
+
             return val;
+        }
+
+        private IValidator GetChildValidator(ChildValidatorAdaptor adaptor)
+        {
+            var validatorContext = new ValidationContext(null);
+            var propertyValidatorContext = new PropertyValidatorContext(validatorContext, null, null);
+            return adaptor.GetValidator(propertyValidatorContext);
         }
 
         private IValidator ResolveValidator(Type modelType)
@@ -90,4 +103,5 @@ namespace SchoStack.AspNetCore.FluentValidation
             return validator;
         }
     }
+#pragma warning enable CS0612 // Type or member is obsolete
 }

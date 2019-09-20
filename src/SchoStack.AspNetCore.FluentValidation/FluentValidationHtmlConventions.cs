@@ -36,7 +36,7 @@ namespace SchoStack.AspNetCore.FluentValidation
         public static string GetMessage(RequestData requestData, PropertyValidatorResult propertyValidator)
         {
             MessageFormatter formatter = new MessageFormatter().AppendPropertyName(propertyValidator.DisplayName);
-            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.ErrorMessageSource.GetString(null));
+            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.Options.ErrorMessageSource.GetString(null));
             return message;
         }
 
@@ -53,7 +53,7 @@ namespace SchoStack.AspNetCore.FluentValidation
                         .AppendPropertyName(result.DisplayName)
                         .AppendArgument("ComparisonValue", equal.MemberToCompare.Name);
                     
-                    string message = formatter.BuildMessage(equal.ErrorMessageSource.GetString(null));
+                    string message = formatter.BuildMessage(equal.Options.ErrorMessageSource.GetString(null));
 
                     htmlTag.Data("val", true);
                     htmlTag.Data("val-equalto", message);

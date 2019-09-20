@@ -15,6 +15,7 @@ using SchoStack.AspNetCore.Sample.Models;
 using SchoStack.AspNetCore.MediatR;
 using SchoStack.AspNetCore.HtmlConventions;
 using SchoStack.AspNetCore.Sample.Components;
+using System.Threading;
 
 namespace SchoStack.AspNetCore.Sample.Controllers
 {
@@ -31,7 +32,7 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         [HttpGet]
         public Task<dynamic> It()
         {
-            return Task.FromResult((dynamic)new{ what = "the"});
+            return Task.FromResult((dynamic)new { what = "the" });
         }
     }
 
@@ -110,9 +111,9 @@ namespace SchoStack.AspNetCore.Sample.Controllers
 
     public class ComponentHandler : IRequestHandler<ComponentQueryModel, Unit>
     {
-        public Unit Handle(ComponentQueryModel message)
+        public Task<Unit> Handle(ComponentQueryModel message, CancellationToken token)
         {
-            return Unit.Value;
+            return Unit.Task;
         }
     }
 
@@ -152,9 +153,9 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         }
     }
 
-    public class AboutCommandHandler : IAsyncRequestHandler<AboutInputModel, AboutResponseModel>
+    public class AboutCommandHandler : IRequestHandler<AboutInputModel, AboutResponseModel>
     {
-        public Task<AboutResponseModel> Handle(AboutInputModel message)
+        public Task<AboutResponseModel> Handle(AboutInputModel message, CancellationToken token)
         {
             return Task.FromResult(new AboutResponseModel() { RedirectUrl = "http://www.google.com" });
         }
