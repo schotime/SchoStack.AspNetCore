@@ -53,13 +53,11 @@ namespace SchoStack.AspNetCore.Sample
                 x.AssemblyContainingType<Startup>();
                 x.ConnectImplementationsToTypesClosing(typeof(IHandler<,>));
                 x.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
-                x.ConnectImplementationsToTypesClosing(typeof(IAsyncRequestHandler<,>));
 
             });
 
             registry.For<IMediator>().Use<Mediator>();
-            registry.For<SingleInstanceFactory>().Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
-            registry.For<MultiInstanceFactory>().Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
+            registry.For<ServiceFactory>().Use<ServiceFactory>(ctx => ctx.GetInstance);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
