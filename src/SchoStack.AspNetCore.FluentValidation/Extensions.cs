@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using FluentValidation;
 using HtmlTags;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using SchoStack.AspNetCore.HtmlConventions.Core;
 
 namespace SchoStack.AspNetCore.FluentValidation
@@ -13,8 +15,9 @@ namespace SchoStack.AspNetCore.FluentValidation
         {
             var fluentValidationOptions = new FluentValidationOptions();
             options?.Invoke(fluentValidationOptions);
-            
-            serviceCollection.AddSingleton<IValidatorFinder>(x => new FluentValidatorFinder(y => (IValidator) x.GetService(y)));
+
+            serviceCollection.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            serviceCollection.AddSingleton<IValidatorFinder>(x => new FluentValidatorFinder(y => (IValidator) x.GetRequiredService<IHttpContextAccessor>().HttpContext.RequestServices.GetService(y)));
             serviceCollection.AddSingleton(new ServiceDescriptor(typeof(FluentValidationOptions), fluentValidationOptions));
         }
     }
