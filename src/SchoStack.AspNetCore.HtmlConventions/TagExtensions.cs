@@ -101,14 +101,16 @@ namespace SchoStack.AspNetCore.HtmlConventions
 
         public static LinkTag Link<T>(this IHtmlHelper htmlHelper, T model, string text) where T : class, new()
         {
-            var urlHelper = new UrlHelper(htmlHelper.ViewContext);
+            var urlHelperFactory = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>();
+            var urlHelper = urlHelperFactory.GetUrlHelper(htmlHelper.ViewContext);
             var tag = TagGen(htmlHelper).GenerateTagFor(htmlHelper.ViewContext, () => new LinkTag(text, urlHelper.For(model)));
             return tag;
         }
 
         public static LinkTag Link(this IHtmlHelper htmlHelper, string text, string action)
         {
-            var urlHelper = new UrlHelper(htmlHelper.ViewContext);
+            var urlHelperFactory = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>();
+            var urlHelper = urlHelperFactory.GetUrlHelper(htmlHelper.ViewContext);
             var tag = TagGen(htmlHelper).GenerateTagFor(htmlHelper.ViewContext, () => new LinkTag(text, urlHelper.Action(action)));
             return tag;
         }
@@ -130,8 +132,8 @@ namespace SchoStack.AspNetCore.HtmlConventions
 
         public static MvcForm Form<TInput>(this IHtmlHelper htmlHelper, TInput model, Action<FormTag> modifier) where TInput : class
         {
-            var urlHelper = new UrlHelper(htmlHelper.ViewContext);
-            var url = urlHelper.For(model);
+            var urlHelperFactory = htmlHelper.ViewContext.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>();
+            var url = urlHelperFactory.GetUrlHelper(htmlHelper.ViewContext).For(model);
             return GenerateForm(model.GetType(), htmlHelper.ViewContext, modifier, url);
         }
 
