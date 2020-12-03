@@ -9,6 +9,7 @@
     <Company />
     <Authors>Adam Schroder</Authors>
     <Version>1.1.3</Version>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
