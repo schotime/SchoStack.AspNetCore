@@ -36,7 +36,7 @@ namespace SchoStack.AspNetCore.FluentValidation
         public static string GetMessage(RequestData requestData, PropertyValidatorResult propertyValidator)
         {
             MessageFormatter formatter = new MessageFormatter().AppendPropertyName(propertyValidator.DisplayName);
-            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.Options.ErrorMessageSource.GetString(null));
+            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.Options.GetErrorMessageTemplate(null));
             return message;
         }
 
@@ -53,7 +53,7 @@ namespace SchoStack.AspNetCore.FluentValidation
                         .AppendPropertyName(result.DisplayName)
                         .AppendArgument("ComparisonValue", equal.MemberToCompare.Name);
                     
-                    string message = formatter.BuildMessage(equal.Options.ErrorMessageSource.GetString(null));
+                    string message = formatter.BuildMessage(equal.Options.GetErrorMessageTemplate(null));
 
                     htmlTag.Data("val", true);
                     htmlTag.Data("val-equalto", message);
@@ -111,7 +111,9 @@ namespace SchoStack.AspNetCore.FluentValidation
 
         public void AddEmailData(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
+#pragma warning disable 618
             var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is EmailValidator);
+#pragma warning restore 618
             if (result != null)
             {
                 var msg = GetMessage(requestData, result) ?? string.Format("The value is not a valid email address");

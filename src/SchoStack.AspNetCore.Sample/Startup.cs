@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using HtmlTags;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SchoStack.AspNetCore.FluentValidation;
 using SchoStack.AspNetCore.HtmlConventions;
 using SchoStack.AspNetCore.Invoker;
@@ -53,7 +55,7 @@ namespace SchoStack.AspNetCore.Sample
                 x.AssemblyContainingType<Startup>();
                 x.ConnectImplementationsToTypesClosing(typeof(IHandler<,>));
                 x.ConnectImplementationsToTypesClosing(typeof(IRequestHandler<,>));
-
+                x.ConnectImplementationsToTypesClosing(typeof(IValidator<>));
             });
 
             registry.For<IMediator>().Use<Mediator>();
@@ -61,12 +63,11 @@ namespace SchoStack.AspNetCore.Sample
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
             }
             else
             {
@@ -75,11 +76,13 @@ namespace SchoStack.AspNetCore.Sample
 
             app.UseStaticFiles();
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+
+            app.UseEndpoints(routes =>
             {
-                routes.MapRoute(
+                routes.MapControllerRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

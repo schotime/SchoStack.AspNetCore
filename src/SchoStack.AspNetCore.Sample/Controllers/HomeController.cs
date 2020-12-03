@@ -16,6 +16,12 @@ using SchoStack.AspNetCore.MediatR;
 using SchoStack.AspNetCore.HtmlConventions;
 using SchoStack.AspNetCore.Sample.Components;
 using System.Threading;
+using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.Validators;
+using HtmlTags.Reflection;
+using SchoStack.AspNetCore.FluentValidation;
+using SchoStack.AspNetCore.HtmlConventions.Core;
 
 namespace SchoStack.AspNetCore.Sample.Controllers
 {
@@ -61,6 +67,13 @@ namespace SchoStack.AspNetCore.Sample.Controllers
             var requiredService = HttpContext.RequestServices.GetRequiredService<IUrlHelper>();
             ViewData["Message"] = await requiredService.ForAsync(new AboutQueryModel(), true);
 
+            var model = new AboutViewModel() { Name = "Name"};
+            var finder = new FluentValidatorFinder(x =>
+            {                
+                var res = (IValidator) HttpContext.RequestServices.GetService(x);
+                return res;
+            });
+            var result = finder.FindValidators(RequestData.BuildRequestData( ReflectionHelper.GetAccessor<AboutViewModel>(x => x.NestedModel.NameNested), typeof(AboutViewModel)));
 
 
             return new HandleActionBuilder<AboutQueryModel>(query, _invoker)
@@ -140,6 +153,12 @@ namespace SchoStack.AspNetCore.Sample.Controllers
     public class AboutViewModel
     {
         public string Name { get; set; }
+        public NestedModel NestedModel { get; set; }
+    }
+
+    public class NestedModel
+    {
+        public string NameNested { get; set; }
     }
 
     public class AboutHandler : IHandler<AboutQueryModel, AboutViewModel>
@@ -164,5 +183,45 @@ namespace SchoStack.AspNetCore.Sample.Controllers
     public class AboutResponseModel
     {
         public string RedirectUrl { get; set; }
+    }
+
+    public class AboutViewModelValidator : AbstractValidator<AboutViewModel>
+    {
+        public AboutViewModelValidator()
+        {
+            RuleFor(x => x.Name).SetValidator(new NameValidator());
+            RuleFor(x => x.NestedModel).SetValidator(new NestedModelValidator());
+        }
+    }
+
+    public class NestedModelValidator : AbstractValidator<NestedModel>
+    {
+        public NestedModelValidator()
+        {
+            RuleFor(x => x.NameNested).NotEmpty();
+        }
+    }
+
+    public class NameValidator : IPropertyValidator
+    {
+        public IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context)
+        {
+            if (!(context.InstanceToValidate is string s) || s != "Name")
+            {
+                yield return new ValidationFailure(context.PropertyName, "The Error");
+            }
+        }
+
+        public Task<IEnumerable<ValidationFailure>> ValidateAsync(PropertyValidatorContext context, CancellationToken cancellation)
+        {
+            return Task.FromResult(Validate(context));
+        }
+
+        public bool ShouldValidateAsynchronously(IValidationContext context)
+        {
+            return false;
+        }
+
+        public PropertyValidatorOptions Options { get; }
     }
 }

@@ -59,49 +59,41 @@ namespace SchoStack.AspNetCore.FluentValidation
             {
                 if (i == propertyInfo.Count - 1)
                 {
-                    var propertyVal = inlineval is DelegatingValidator delegatingValidator
-                        ? delegatingValidator.InnerValidator
-                        : inlineval;
-
-                    propertyValidators.Add(new PropertyValidatorResult(propertyVal, name));
+                    propertyValidators.Add(new PropertyValidatorResult(inlineval, name));
                 }
-
-                var val = GetValidator(inlineval, null);
-
+                
+                var val = GetValidator(inlineval);
                 if (val == null)
                     continue;
 
-                var morevals = GetNestedPropertyValidators(val.CreateDescriptor(), propertyInfo, i + 1);
-                propertyValidators.AddRange(morevals.Select(x => new PropertyValidatorResult(x.PropertyValidator, x.DisplayName)));
+                var nestedPropertyValidators = GetNestedPropertyValidators(val.CreateDescriptor(), propertyInfo, i + 1);
+                propertyValidators.AddRange(nestedPropertyValidators.Select(x => new PropertyValidatorResult(x.PropertyValidator, x.DisplayName)));
             }
 
             return propertyValidators;
         }
 
-        private IValidator GetValidator(IPropertyValidator inlineval, IValidator val)
+        private IValidator GetChildValidator(IChildValidatorAdaptor adaptor)
         {
-            var valtype = inlineval.GetType();
-            if (valtype == typeof(ChildValidatorAdaptor))
-                val = GetChildValidator((ChildValidatorAdaptor)inlineval);
-            else if (valtype == typeof(DelegatingValidator))
-                val = GetValidator(((DelegatingValidator)inlineval).InnerValidator, val);
-
-            return val;
+            var validatorContext = new ValidationContext<object>(null);
+            var propertyValidatorContext = new PropertyValidatorContext(validatorContext, null, null, null);
+            return ((dynamic) adaptor).GetValidator(propertyValidatorContext);
         }
 
-        private IValidator GetChildValidator(ChildValidatorAdaptor adaptor)
+        private IValidator GetValidator(IPropertyValidator propertyValidator)
         {
-            var validatorContext = new ValidationContext(null);
-            var propertyValidatorContext = new PropertyValidatorContext(validatorContext, null, null);
-            return adaptor.GetValidator(propertyValidatorContext);
+            if (propertyValidator is IChildValidatorAdaptor child)
+                return GetChildValidator(child);
+
+            return null;
         }
 
         private IValidator ResolveValidator(Type modelType)
         {
             var gentype = typeof(IValidator<>).MakeGenericType(modelType);
-            var validator = (IValidator)_resolver(gentype);
+            var validator = _resolver(gentype);
             return validator;
         }
     }
-#pragma warning enable CS0612 // Type or member is obsolete
+#pragma warning restore CS0612 // Type or member is obsolete
 }

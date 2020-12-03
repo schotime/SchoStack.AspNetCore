@@ -169,7 +169,8 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
         {
             var req = new RequestData()
             {
-                Accessor = accessor
+                Accessor = accessor,
+                InputType = inputType
             };
             return req;
         }

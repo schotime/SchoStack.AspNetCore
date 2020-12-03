@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using StructureMap;
 using StructureMap.AspNetCore;
 
 namespace SchoStack.AspNetCore.Sample
@@ -18,10 +20,13 @@ namespace SchoStack.AspNetCore.Sample
             BuildWebHost(args).Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseStructureMap()
+        public static IHost BuildWebHost(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new StructureMapServiceProviderFactory(new Registry()))
+                .ConfigureWebHostDefaults(x =>
+                {
+                    x.UseStartup<Startup>();
+                })
                 .Build();
     }
 }
