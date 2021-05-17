@@ -39,3 +39,9 @@
 <div model-url-data-url="new AboutInputModel()"></div>
 
 @await Component.InvokeAsync(new ComponentQueryModel() { Name = "The Name From Component" })
+
+@using (Html.Form<AboutInputModel4>())
+{
+    <div>Url: (@(Url.For(new AboutInputModel4 { Name = "witch"})))</div>
+    <button type="submit">Submit</button>
+}

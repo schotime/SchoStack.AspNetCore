@@ -101,6 +101,20 @@ namespace SchoStack.AspNetCore.Sample.Controllers
             .Success(_ => Redirect(Url.For(new AboutQueryModel())))
             .Send();
 
+        [HttpGet]
+        [Route("home/about3/{Name}")]
+        public ActionResult About3(AboutInputModel3 input)
+        {
+            return View("About", new AboutViewModel() { Name = input.Name });
+        }
+
+        [HttpPost]
+        [Route("home/about4/{Name}")]
+        public ActionResult About3Post(AboutInputModel4 input)
+        {
+            return RedirectToAction("About3", new{ Name = input.Name });
+        }
+
         [Route("home/component")]
         public IActionResult Component(ComponentQueryModel query) => this.ViewComponent(query);
 
@@ -115,6 +129,16 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+    }
+
+    public class AboutInputModel3
+    {
+        public string Name { get; set; }
+    }
+
+    public class AboutInputModel4
+    {
+        public string Name { get; set; }
     }
 
     public class ComponentQueryModel : IRequest<Unit>, IComponentModel<TestComponent>

@@ -267,10 +267,10 @@ namespace SchoStack.AspNetCore.ModelUrls
 
             var modelMetadata = metadataProvider.GetMetadataForType(modelType);
 
-            //if (modelMetadata.BoundConstructor != null)
-            //{
-            //    throw new NotSupportedException(Resources.FormatTryUpdateModel_RecordTypeNotSupported(nameof(TryUpdateModelAsync), modelType));
-            //}
+            if (modelMetadata.BoundConstructor != null)
+            {
+                throw new NotSupportedException(Resources.FormatTryUpdateModel_RecordTypeNotSupported(nameof(TryUpdateModelAsync), modelType));
+            }
 
             var modelState = actionContext.ModelState;
 

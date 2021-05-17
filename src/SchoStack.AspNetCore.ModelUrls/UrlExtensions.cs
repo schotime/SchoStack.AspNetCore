@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace SchoStack.AspNetCore.ModelUrls
@@ -37,8 +40,12 @@ namespace SchoStack.AspNetCore.ModelUrls
             var dictGenerator = new RouteValueDictionaryGenerator();
             var actionConventions = urlHelper.ActionContext.HttpContext.RequestServices.GetRequiredService<ActionConventionOptions>();
             var dict = dictGenerator.Generate(model, (t, o) => actionConventions.TypeFormatters.ContainsKey(t) ? actionConventions.TypeFormatters[t](o, urlHelper.ActionContext) : o, (propertyInfo, atts) => actionConventions.PropertyNameModifier.GetModifiedPropertyName(propertyInfo, atts));
-            var url = urlHelper.RouteUrl(model.GetType().ToString(), dict);
+            
+            // Workaround for https://github.com/dotnet/aspnetcore/issues/14877
+            var dict2 = dict.Concat(urlHelper.ActionContext.RouteData.Values
+                .Where(x => x.Key != "action" && x.Key != "controller" && !dict.ContainsKey(x.Key)));
 
+            var url = urlHelper.RouteUrl(model.GetType().ToString(), new RouteValueDictionary(dict2));
             return url;
         }
 
@@ -55,7 +62,7 @@ namespace SchoStack.AspNetCore.ModelUrls
                 var modelfactory = urlHelper.ActionContext.HttpContext.RequestServices.GetRequiredService<IModelBinderFactory>();
                 var validator = urlHelper.ActionContext.HttpContext.RequestServices.GetRequiredService<IObjectModelValidator>();
 
-                var modelBound = await ModelBindingHelper.TryUpdateModelAsync((dynamic) model,
+                var modelBound = await ModelBindingHelper.TryUpdateModelAsync((dynamic)model,
                     string.Empty,
                     new ControllerContext(urlHelper.ActionContext),
                     meta,
