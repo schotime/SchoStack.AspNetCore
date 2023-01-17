@@ -24,6 +24,7 @@ namespace SchoStack.AspNetCore.MediatR
     {
         IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, Task<TResult>> result);
         IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result);
+        IBuilderActions<TResponse, TResult> BeforeSend(Func<IBaseRequest, IActionContextAccessor, Task> beforeSendHook);
         IBuilderActions<TResponse, TResult> Error(Func<Task<TResult>> result);
         IBuilderActions<TResponse, TResult> Error(Func<TResult> result);
         ISendableActions<TResult> Success(Func<TResponse, Task<TResult>> result);
@@ -63,6 +64,7 @@ namespace SchoStack.AspNetCore.MediatR
             private readonly IRequest<TResponse> _request;
 
             private readonly List<ConditionResult<TResponse, TResult>> _conditionResults  = new List<ConditionResult<TResponse, TResult>>();
+            private readonly List<BeforeSendHook> _beforeSendHooks = new List<MediatrResultBuilder.BeforeSendHook>();
             private Func<Task<TResult>> _errorResult;
             private Func<TResponse, Task<TResult>> _successResult;
 
@@ -82,6 +84,12 @@ namespace SchoStack.AspNetCore.MediatR
             public IBuilderActions<TResponse, TResult> On(Func<TResponse, bool> condition, Func<TResponse, TResult> result)
             {
                 _conditionResults.Add(new ConditionResult<TResponse, TResult>(condition, resp => Task.FromResult(result.Invoke(resp))));
+                return this;
+            }
+
+            public IBuilderActions<TResponse, TResult> BeforeSend(Func<IBaseRequest, IActionContextAccessor, Task> beforeSendHook)
+            {
+                _beforeSendHooks.Add(new BeforeSendHook(beforeSendHook));
                 return this;
             }
 
@@ -111,6 +119,11 @@ namespace SchoStack.AspNetCore.MediatR
 
             public async Task<TResult> Send(CancellationToken cancellationToken = default(CancellationToken))
             {
+                foreach (var hook in _beforeSendHooks)
+                {
+                    await hook.Hook(_request, _actionContextAccessor);
+                }
+
                 if (_errorResult != null && !_actionContextAccessor.ActionContext.ModelState.IsValid)
                     return await _errorResult();
 
@@ -134,6 +147,16 @@ namespace SchoStack.AspNetCore.MediatR
 
             public Func<TResponse, bool> Condition { get; }
             public Func<TResponse, Task<TResult>> Result { get; }
+        }
+
+        public class BeforeSendHook
+        {
+            public BeforeSendHook(Func<IBaseRequest, IActionContextAccessor, Task> hook)
+            {
+                Hook = hook;
+            }
+
+            public Func<IBaseRequest, IActionContextAccessor, Task> Hook { get; }
         }
     }
 }
