@@ -96,6 +96,11 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         [Route("home/about")]
         public async Task<IActionResult> About(AboutInputModel input) => await _actionBuilder
             .For(input)
+            .BeforeSend(async (_, c) =>
+            {
+                c.ActionContext.HttpContext.Response.Headers.Add("X-Test", "test"); 
+                await Task.CompletedTask;
+            })
             .Error(async () => await About(new AboutQueryModel()))
             .On(y => !string.IsNullOrEmpty(y.RedirectUrl), y => Redirect(y.RedirectUrl))
             .Success(_ => Redirect(Url.For(new AboutQueryModel())))
