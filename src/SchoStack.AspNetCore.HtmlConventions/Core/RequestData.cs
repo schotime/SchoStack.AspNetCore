@@ -114,7 +114,7 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
             return ConvertValue<T>(this, val);
         }
 
-        private object GetModel()
+        public object GetModel()
         {
             return ViewContext.ViewData.ContainsKey("SchoStack.Model")
                 ? ViewContext.ViewData["SchoStack.Model"]
@@ -123,7 +123,7 @@ namespace SchoStack.AspNetCore.HtmlConventions.Core
 
         public static T ConvertValue<T>(RequestData rd, object val)
         {
-            if (TagConventions.IsAssignable<T>(rd))
+            if (TagConventions.IsAssignable<T>(rd, true))
                 return (T)val;
 
             if (typeof(T) == typeof(string))
