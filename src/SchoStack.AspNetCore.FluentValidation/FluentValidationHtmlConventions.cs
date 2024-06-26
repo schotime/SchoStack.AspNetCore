@@ -36,16 +36,16 @@ namespace SchoStack.AspNetCore.FluentValidation
         public static string GetMessage(RequestData requestData, PropertyValidatorResult propertyValidator)
         {
             MessageFormatter formatter = new MessageFormatter().AppendPropertyName(propertyValidator.DisplayName);
-            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.Options.GetErrorMessageTemplate(null));
+            string message = formatter.BuildMessage(propertyValidator.PropertyValidator.GetDefaultMessageTemplate(null));
             return message;
         }
 
         public void AddEqualToDataAttr(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData request)
         {
-            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is EqualValidator);
+            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is IEqualValidator);
             if (result != null)
             {
-                var equal = result.PropertyValidator as EqualValidator;
+                var equal = result.PropertyValidator as IEqualValidator;
                 
                 if (equal.MemberToCompare != null)
                 {
@@ -53,7 +53,7 @@ namespace SchoStack.AspNetCore.FluentValidation
                         .AppendPropertyName(result.DisplayName)
                         .AppendArgument("ComparisonValue", equal.MemberToCompare.Name);
                     
-                    string message = formatter.BuildMessage(equal.Options.GetErrorMessageTemplate(null));
+                    string message = formatter.BuildMessage(equal.GetDefaultMessageTemplate(null));
 
                     htmlTag.Data("val", true);
                     htmlTag.Data("val-equalto", message);
@@ -67,8 +67,7 @@ namespace SchoStack.AspNetCore.FluentValidation
 
         public void AddRequiredClass(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
-            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is NotEmptyValidator
-                                                             || x.PropertyValidator is NotNullValidator);
+            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is INotEmptyValidator or INotNullValidator);
 
             if (result != null)
             {
@@ -78,16 +77,16 @@ namespace SchoStack.AspNetCore.FluentValidation
 
         public void AddLengthClasses(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
-            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is LengthValidator);
-            if (result != null)
+            var lengthValidator = propertyValidators.Select(x => x.PropertyValidator).OfType<ILengthValidator>().FirstOrDefault();
+            if (lengthValidator != null)
             {
-                htmlTag.Attr("maxlength", ((LengthValidator)result.PropertyValidator).Max);
+                htmlTag.Attr("maxlength", lengthValidator.Max);
             }
         }
 
         public void AddCreditCardClass(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
-            var lengthValidator = propertyValidators.Select(x => x.PropertyValidator).OfType<CreditCardValidator>().FirstOrDefault();
+            var lengthValidator = propertyValidators.Select(x => x.PropertyValidator).OfType<ICreditCardValidator>().FirstOrDefault();
             if (lengthValidator != null)
             {
                 //if (!_msUnobtrusive)
@@ -99,11 +98,11 @@ namespace SchoStack.AspNetCore.FluentValidation
 
         public void AddRegexData(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
-            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is RegularExpressionValidator);
+            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is IRegularExpressionValidator);
 
             if (result != null)
             {
-                var regex = result.PropertyValidator as RegularExpressionValidator;
+                var regex = (IRegularExpressionValidator)result.PropertyValidator;
                 var msg = GetMessage(requestData, result) ?? string.Format("The value did not match the regular expression '{0}'", regex.Expression);
                 htmlTag.Data("val", true).Data("val-regex", msg).Data("val-regex-pattern", regex.Expression);
             }
@@ -111,9 +110,7 @@ namespace SchoStack.AspNetCore.FluentValidation
 
         public void AddEmailData(IEnumerable<PropertyValidatorResult> propertyValidators, HtmlTag htmlTag, RequestData requestData)
         {
-#pragma warning disable 618
-            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is EmailValidator);
-#pragma warning restore 618
+            var result = propertyValidators.FirstOrDefault(x => x.PropertyValidator is IEmailValidator);
             if (result != null)
             {
                 var msg = GetMessage(requestData, result) ?? string.Format("The value is not a valid email address");
