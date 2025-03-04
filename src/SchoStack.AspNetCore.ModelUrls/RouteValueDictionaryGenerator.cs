@@ -40,6 +40,9 @@ namespace SchoStack.AspNetCore.ModelUrls
 
             foreach (PropertyInfo p in propCaches.GetOrAdd(t, t1 => TypeExtensions.GetProperties(t1)))
             {
+                if (p.GetGetMethod()?.IsStatic == true)
+                    continue;
+
                 var theCache = cache.GetOrAdd(t.FullName + prefix + p.Name, _ =>
                 {
                     return new Cache
