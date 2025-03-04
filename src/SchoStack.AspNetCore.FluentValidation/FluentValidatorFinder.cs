@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using FluentValidation;
 using FluentValidation.Validators;
@@ -27,11 +26,11 @@ namespace SchoStack.AspNetCore.FluentValidation
         public IEnumerable<PropertyValidatorResult> FindValidators(RequestData requestData)
         {
             if (requestData.InputType == null)
-                return new List<PropertyValidatorResult>();
+                return Array.Empty<PropertyValidatorResult>();
 
             var baseValidator = ResolveValidator(requestData.InputType);
             if (baseValidator == null)
-                return new List<PropertyValidatorResult>();
+                return Array.Empty<PropertyValidatorResult>();
 
             var properties = InputPropertyMatcher.FindPropertyData(requestData);
             var validators = GetPropertyValidators(baseValidator, properties);
@@ -41,49 +40,47 @@ namespace SchoStack.AspNetCore.FluentValidation
         private IEnumerable<PropertyValidatorResult> GetPropertyValidators(IValidator baseValidator, List<PropertyInfo> properties)
         {
             var desc = baseValidator.CreateDescriptor();
-            var validators = GetNestedPropertyValidators(desc, properties, 0).ToList();
+            var validators = GetNestedPropertyValidators(desc, properties, 0);
             return validators;
         }
 
         private IEnumerable<PropertyValidatorResult> GetNestedPropertyValidators(IValidatorDescriptor desc, List<PropertyInfo> propertyInfo, int i)
         {
             if (i == propertyInfo.Count)
-                return new List<PropertyValidatorResult>();
+                yield break;
 
             var vals = desc.GetValidatorsForMember(propertyInfo[i].Name);
             var name = desc.GetName(propertyInfo[i].Name);
 
-            var propertyValidators = new List<PropertyValidatorResult>();
-
-            foreach (var inlineval in vals)
+            foreach ((dynamic inlineval, _) in vals)
             {
                 if (i == propertyInfo.Count - 1)
                 {
-                    propertyValidators.Add(new PropertyValidatorResult(inlineval, name));
+                    yield return new PropertyValidatorResult(inlineval, name);
                 }
-                
-                var val = GetValidator(inlineval);
+
+                IValidator val = GetValidator(inlineval);
                 if (val == null)
                     continue;
 
                 var nestedPropertyValidators = GetNestedPropertyValidators(val.CreateDescriptor(), propertyInfo, i + 1);
-                propertyValidators.AddRange(nestedPropertyValidators.Select(x => new PropertyValidatorResult(x.PropertyValidator, x.DisplayName)));
+                foreach (var validator in nestedPropertyValidators)
+                {
+                    yield return validator;
+                }
             }
-
-            return propertyValidators;
         }
 
-        private IValidator GetChildValidator(IChildValidatorAdaptor adaptor)
+        private static IValidator GetChildValidator<T>(IChildValidatorAdaptor adaptor)
         {
-            var validatorContext = new ValidationContext<object>(null);
-            var propertyValidatorContext = new PropertyValidatorContext(validatorContext, null, null, null);
-            return ((dynamic) adaptor).GetValidator(propertyValidatorContext);
+            var validatorContext = new ValidationContext<T>(default);
+            return ((dynamic)adaptor).GetValidator(validatorContext, null);
         }
 
-        private IValidator GetValidator(IPropertyValidator propertyValidator)
+        private static IValidator GetValidator<T, TProperty>(PropertyValidator<T, TProperty> propertyValidator)
         {
             if (propertyValidator is IChildValidatorAdaptor child)
-                return GetChildValidator(child);
+                return GetChildValidator<T>(child);
 
             return null;
         }

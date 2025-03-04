@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +19,6 @@ using System.Threading;
 using FluentValidation;
 using FluentValidation.Results;
 using FluentValidation.Validators;
-using HtmlTags.Reflection;
 using SchoStack.AspNetCore.FluentValidation;
 using SchoStack.AspNetCore.HtmlConventions.Core;
 
@@ -98,7 +97,7 @@ namespace SchoStack.AspNetCore.Sample.Controllers
             .For(input)
             .BeforeSend(async (_, c) =>
             {
-                c.ActionContext.HttpContext.Response.Headers.Add("X-Test", "test"); 
+                c.ActionContext.HttpContext.Response.Headers.Append("X-Test", "test"); 
                 await Task.CompletedTask;
             })
             .Error(async () => await About(new AboutQueryModel()))
@@ -218,7 +217,7 @@ namespace SchoStack.AspNetCore.Sample.Controllers
     {
         public AboutViewModelValidator()
         {
-            RuleFor(x => x.Name).SetValidator(new NameValidator());
+            RuleFor(x => x.Name).SetValidator(new NameValidator<AboutViewModel>());
             RuleFor(x => x.NestedModel).SetValidator(new NestedModelValidator());
         }
     }
@@ -231,26 +230,21 @@ namespace SchoStack.AspNetCore.Sample.Controllers
         }
     }
 
-    public class NameValidator : IPropertyValidator
+    public class NameValidator<TModel> : IPropertyValidator<TModel,string>
     {
-        public IEnumerable<ValidationFailure> Validate(PropertyValidatorContext context)
+        public string Name => nameof(NameValidator<TModel>);
+
+        public string GetDefaultMessageTemplate(string errorCode) => "The Error";
+
+        public bool IsValid(ValidationContext<TModel> context, string value)
         {
-            if (!(context.InstanceToValidate is string s) || s != "Name")
+            if (value != "Name")
             {
-                yield return new ValidationFailure(context.PropertyName, "The Error");
+                context.AddFailure(new ValidationFailure(context.PropertyName, "The Error"));
+                return false;
             }
-        }
 
-        public Task<IEnumerable<ValidationFailure>> ValidateAsync(PropertyValidatorContext context, CancellationToken cancellation)
-        {
-            return Task.FromResult(Validate(context));
+            return true;
         }
-
-        public bool ShouldValidateAsynchronously(IValidationContext context)
-        {
-            return false;
-        }
-
-        public PropertyValidatorOptions Options { get; }
     }
 }
