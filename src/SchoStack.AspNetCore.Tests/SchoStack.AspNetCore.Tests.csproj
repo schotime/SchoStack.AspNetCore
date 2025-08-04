@@ -1,6 +1,7 @@
 ﻿<Project Sdk="MSTest.Sdk/3.6.4">
 	<Import Project="..\Common.props" />
 	<PropertyGroup>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<IsPackable>false</IsPackable>
