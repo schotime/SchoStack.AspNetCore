@@ -1,0 +1,18 @@
+﻿<Project Sdk="MSTest.Sdk/3.6.4">
+	<Import Project="..\Common.props" />
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="NSubstitute" Version="5.3.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\SchoStack.AspNetCore.FluentValidation\SchoStack.AspNetCore.FluentValidation.csproj" />
+	  <ProjectReference Include="..\SchoStack.AspNetCore.HtmlConventions\SchoStack.AspNetCore.HtmlConventions.csproj" />
+	  <ProjectReference Include="..\SchoStack.AspNetCore.Invoker\SchoStack.AspNetCore.Invoker.csproj" />
+	  <ProjectReference Include="..\SchoStack.AspNetCore.MediatR\SchoStack.AspNetCore.MediatR.csproj" />
+	  <ProjectReference Include="..\SchoStack.AspNetCore.ModelUrls\SchoStack.AspNetCore.ModelUrls.csproj" />
+	</ItemGroup>
+</Project>

@@ -18,6 +18,7 @@ Task Build -depends Clean {
     Set-Location "$solution_dir"
     Write-Host "Creating BuildArtifacts" -ForegroundColor Green
     Exec { dotnet restore }
+    Exec { dotnet test }
     Exec { dotnet pack --configuration Release --output $build_artifacts_dir } 
 }
 

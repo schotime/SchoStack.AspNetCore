@@ -29,7 +29,22 @@ namespace SchoStack.AspNetCore.ModelUrls
         public static ConcurrentDictionary<string, Cache> cache = new ConcurrentDictionary<string, Cache>();
         public static ConcurrentDictionary<Type, PropertyInfo[]> propCaches = new ConcurrentDictionary<Type, PropertyInfo[]>();
 
-        public RouteValueDictionary Generate(object o, Func<Type, object, object> typeFormatter, Func<PropertyInfo, Attribute[], string> propertyNameFormatter, string prefix = "", RouteValueDictionary dict = null)
+        public RouteValueDictionaryGenerator(ActionContext actionContext, ActionConventionOptions conventionOptions)
+        {
+            _actionContext = actionContext;
+            _conventionOptions = conventionOptions;
+        }
+
+        /// <summary>
+        /// Generates a <see cref="RouteValueDictionary"/> from the public properties of the given object.
+        /// Handles simple, enumerable, and complex property types recursively, applying <see cref="ActionConventionOptions"/>.
+        /// Value types, types implementing <see cref="IFormattable"/> or types with a <see cref="ActionConventionOptions.TypeFormatters"/> are treated as simple.
+        /// Properties with default values or nulls are skipped unless marked with <see cref="FromRouteAttribute"/>.
+        /// </summary>
+        /// <param name="o">The object to generate route values from.</param>
+        /// <param name="prefix">An optional prefix for each top level property name.</param>
+        /// <param name="dict">An optional existing <see cref="RouteValueDictionary"/> to add values to; if null, a new dictionary is created.</param>
+        public RouteValueDictionary Generate(object o, string prefix = "", RouteValueDictionary dict = null)
         {
             if (o == null)
                 return dict;
@@ -43,7 +58,7 @@ namespace SchoStack.AspNetCore.ModelUrls
                 if (p.GetGetMethod()?.IsStatic == true)
                     continue;
 
-                var theCache = cache.GetOrAdd(t.FullName + prefix + p.Name, _ =>
+                var theCache = cache.GetOrAdd($"{t.FullName}{prefix}{p.Name}", _ =>
                 {
                     return new Cache
                     {
@@ -56,6 +71,8 @@ namespace SchoStack.AspNetCore.ModelUrls
                 var propType = theCache.PropType;
                 var attributes = theCache.Attributes;
                 var accessor = theCache.MemberAccessor;
+                var propertyName = _conventionOptions.PropertyNameModifier.GetModifiedPropertyName(p, attributes);
+                var prefixedPropertyName = $"{prefix}{propertyName}";
 
                 if (propType == PropType.Simple)
                 {
@@ -66,7 +83,7 @@ namespace SchoStack.AspNetCore.ModelUrls
                         continue;
                     }
 
-                    dict.Add(prefix + propertyNameFormatter(p, attributes), typeFormatter(p.PropertyType, val));
+                    dict.Add(prefixedPropertyName, ConvertTypeValue(p.PropertyType, val));
                 }
                 else if (propType == PropType.Enumerable)
                 {
@@ -78,20 +95,21 @@ namespace SchoStack.AspNetCore.ModelUrls
 
                         var subType = sub.GetType();
                         var subPropType = IsEnum(subType) || IsConvertible(subType) ? PropType.Simple : PropType.Unknown;
+                        var indexedPropertyName = $"{prefixedPropertyName}[{i++}]";
 
                         if (subPropType == PropType.Simple)
                         {
-                            dict.Add(prefix + propertyNameFormatter(p, attributes) + "[" + (i++) + "]", typeFormatter(subType, sub));
+                            dict.Add(indexedPropertyName, ConvertTypeValue(subType, sub));
                         }
                         else
                         {
-                            Generate(sub, typeFormatter, propertyNameFormatter, prefix + propertyNameFormatter(p, attributes) + "[" + (i++) + "].", dict);
+                            Generate(sub, $"{indexedPropertyName}.", dict);
                         }
                     }
                 }
                 else if (propType == PropType.Complex)
                 {
-                    Generate(accessor.Get(o), typeFormatter, propertyNameFormatter, prefix + propertyNameFormatter(p, attributes) + ".", dict);
+                    Generate(accessor.Get(o), $"{prefixedPropertyName}.", dict);
                 }
             }
 
@@ -127,16 +145,44 @@ namespace SchoStack.AspNetCore.ModelUrls
                 if (t.IsAssignableFrom(type) || (Nullable.GetUnderlyingType(type) != null && t.IsAssignableFrom(Nullable.GetUnderlyingType(type))))
                     return true;
             }
+
             return false;
         }
 
+        private object ConvertTypeValue(Type t, object value)
+        {
+            if (_conventionOptions.TypeFormatters.ContainsKey(t))
+            {
+                return _conventionOptions.TypeFormatters[t](value, _actionContext);
+            }
+
+            return value;
+        }
+
         /// <summary>
-        /// Returns true if this Type is one of the types accepted by Convert.ToString() 
+        /// Returns true if this Type is one of the types accepted by Convert.ToString(), IFormattable or one of the <see cref="ActionConventionOptions.TypeFormatters"/>
         /// (other than object).
         /// </summary>
-        private static bool IsConvertible(Type t)
+        private bool IsConvertible(Type t)
         {
-            return In(t, ConvertibleTypes);
+            return IsConvertibleByMvc(t) || _conventionOptions.TypeFormatters.ContainsKey(t);
+        }
+
+        /// <summary>
+        /// Returns true if this Type is one of the types accepted by Convert.ToString() or IFormattable
+        /// (other than object).
+        /// </summary>
+        private static bool IsConvertibleByMvc(Type t)
+        {
+            return In(t, ConvertibleTypes) || IsFormattable(t);
+        }
+
+        /// <summary>
+        /// Gets whether this type is IFormattable.
+        /// </summary>
+        private static bool IsFormattable(Type t)
+        {
+            return typeof(IFormattable).IsAssignableFrom(t);
         }
 
         /// <summary>
@@ -166,6 +212,8 @@ namespace SchoStack.AspNetCore.ModelUrls
             {typeof (float), new float()},
             {typeof (double), new double()},
         };
+        private readonly ActionContext _actionContext;
+        private readonly ActionConventionOptions _conventionOptions;
 
         private static object GetDefault(Type type)
         {

@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.Validators;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using SchoStack.AspNetCore.Invoker;
-using SchoStack.AspNetCore.ModelUrls;
-using SchoStack.AspNetCore.Sample.Models;
-using SchoStack.AspNetCore.MediatR;
-using SchoStack.AspNetCore.HtmlConventions;
-using SchoStack.AspNetCore.Sample.Components;
-using System.Threading;
-using FluentValidation;
-using FluentValidation.Results;
-using FluentValidation.Validators;
-using HtmlTags.Reflection;
 using SchoStack.AspNetCore.FluentValidation;
+using SchoStack.AspNetCore.HtmlConventions;
 using SchoStack.AspNetCore.HtmlConventions.Core;
+using SchoStack.AspNetCore.Invoker;
+using SchoStack.AspNetCore.MediatR;
+using SchoStack.AspNetCore.ModelUrls;
+using SchoStack.AspNetCore.Sample.Components;
+using SchoStack.AspNetCore.Sample.Models;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SchoStack.AspNetCore.Sample.Controllers
 {
@@ -98,7 +94,7 @@ namespace SchoStack.AspNetCore.Sample.Controllers
             .For(input)
             .BeforeSend(async (_, c) =>
             {
-                c.ActionContext.HttpContext.Response.Headers.Add("X-Test", "test"); 
+                c.ActionContext.HttpContext.Response.Headers["X-Test"] = "test"; 
                 await Task.CompletedTask;
             })
             .Error(async () => await About(new AboutQueryModel()))

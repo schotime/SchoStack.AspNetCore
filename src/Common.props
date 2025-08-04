@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+		<LangVersion>12</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Authors>Adam Schroder</Authors>
+		<PackageVersion>$(Version)</PackageVersion>
+	</PropertyGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="SchoStack.AspNetCore.Tests"/>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+</Project>

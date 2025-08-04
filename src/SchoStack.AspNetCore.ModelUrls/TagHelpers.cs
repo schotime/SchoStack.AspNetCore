@@ -16,6 +16,8 @@ namespace SchoStack.AspNetCore.ModelUrls
     [HtmlTargetElement(Attributes = "model-url-*")]
     public class ModelUrlTagHelper : TagHelper
     {
+        public const string SchoStackModelTypeHttpContextItemKey = "SchoStack.Model";
+
         private readonly IHtmlGenerator _generator;
         private IDictionary<string, object> _modelUrls;
 
@@ -46,7 +48,7 @@ namespace SchoStack.AspNetCore.ModelUrls
             if (context.TagName == "form" && ModelUrls.ContainsKey("action"))
             {
                 var modelType = ModelUrls["action"].GetType();
-                ViewContext.HttpContext.Items["SchoStack.Model"] = modelType;
+                ViewContext.HttpContext.Items[SchoStackModelTypeHttpContextItemKey] = modelType;
                 var modelConventions = ViewContext.HttpContext.RequestServices.GetRequiredService<TypedRoutingApplicationModelConvention>();
                 if (modelConventions.RouteInformations.ContainsKey(modelType) && modelConventions.RouteInformations[modelType].Method == HttpMethod.Post)
                 {
