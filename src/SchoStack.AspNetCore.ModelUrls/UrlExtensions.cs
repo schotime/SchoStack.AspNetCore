@@ -37,9 +37,9 @@ namespace SchoStack.AspNetCore.ModelUrls
         {
             await BindModelFor(urlHelper, model, bindExistingQueryString, modifiers);
 
-            var dictGenerator = new RouteValueDictionaryGenerator();
             var actionConventions = urlHelper.ActionContext.HttpContext.RequestServices.GetRequiredService<ActionConventionOptions>();
-            var dict = dictGenerator.Generate(model, (t, o) => actionConventions.TypeFormatters.ContainsKey(t) ? actionConventions.TypeFormatters[t](o, urlHelper.ActionContext) : o, (propertyInfo, atts) => actionConventions.PropertyNameModifier.GetModifiedPropertyName(propertyInfo, atts));
+            var dictGenerator = new RouteValueDictionaryGenerator(urlHelper.ActionContext, actionConventions);
+            var dict = dictGenerator.Generate(model);
             
             // Workaround for https://github.com/dotnet/aspnetcore/issues/14877
             var dict2 = dict.Concat(urlHelper.ActionContext.RouteData.Values

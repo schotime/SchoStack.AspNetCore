@@ -16,3 +16,4 @@ dev_*
 *.tss
 .vs
 project.lock.json
+src/TestResults

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36109.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SchoStack.AspNetCore.ModelUrls", "SchoStack.AspNetCore.ModelUrls\SchoStack.AspNetCore.ModelUrls.csproj", "{41825DC8-50BA-49BB-B6FD-3630F24579A7}"
 EndProject
@@ -14,6 +14,13 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.Invoker", "SchoStack.AspNetCore.Invoker\SchoStack.AspNetCore.Invoker.csproj", "{7EC91209-7C39-4FE1-A780-0103B74E7E60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.MediatR", "SchoStack.AspNetCore.MediatR\SchoStack.AspNetCore.MediatR.csproj", "{08BA5637-9BBD-48CF-B89C-3F5905C5F491}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		Common.props = Common.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchoStack.AspNetCore.Tests", "SchoStack.AspNetCore.Tests\SchoStack.AspNetCore.Tests.csproj", "{6A74F7D1-3D63-4238-B5DD-9DCA2F0F4089}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +52,10 @@ Global
 		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{08BA5637-9BBD-48CF-B89C-3F5905C5F491}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A74F7D1-3D63-4238-B5DD-9DCA2F0F4089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A74F7D1-3D63-4238-B5DD-9DCA2F0F4089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A74F7D1-3D63-4238-B5DD-9DCA2F0F4089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A74F7D1-3D63-4238-B5DD-9DCA2F0F4089}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
